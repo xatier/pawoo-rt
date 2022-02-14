@@ -1,0 +1,54 @@
+apiVersion: '2021-09-01'
+location: <azure region>
+name: pawoo-rt
+properties:
+  containers:
+    - name: pawoo-rt
+      properties:
+        environmentVariables:
+          - name: TOKEN
+            value: ''
+        image: ghcr.io/xatier/pawoo-rt:latest
+        ports:
+          - port: 5566
+            protocol: TCP
+        resources:
+          requests:
+            cpu: 0.5
+            memoryInGB: 0.5
+    - name: caddy
+      properties:
+        image: caddy:latest
+        command:
+          [
+            'caddy',
+            'reverse-proxy',
+            '--from',
+            'pawoo-rt.<azure region>.azurecontainer.io',
+            '--to',
+            'localhost:5566',
+          ]
+        ports:
+          - port: 80
+            protocol: TCP
+          - port: 443
+            protocol: TCP
+        resources:
+          requests:
+            cpu: 0.5
+            memoryInGB: 0.5
+  initContainers: []
+  ipAddress:
+    dnsNameLabel: pawoo-rt
+    fqdn: pawoo-rt.<azure region>.azurecontainer.io
+    ports:
+      - port: 80
+        protocol: TCP
+      - port: 443
+        protocol: TCP
+    type: Public
+  osType: Linux
+  restartPolicy: Always
+  sku: Standard
+tags: {}
+type: Microsoft.ContainerInstance/containerGroups
