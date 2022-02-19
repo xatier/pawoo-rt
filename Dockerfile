@@ -15,8 +15,7 @@ COPY ./server.py /app/server.py
 
 RUN python -m venv venv && \
     source venv/bin/activate && \
-    pip install -U pip && \
-    pip install -r requirements.txt
+    pip install --no-cache-dir -U pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-CMD source venv/bin/activate && \
-    exec uvicorn server:app --reload --port 5566
+CMD ["bash", "-c", "source venv/bin/activate && exec uvicorn server:app --reload --port 5566"]
