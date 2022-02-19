@@ -1,6 +1,6 @@
 # pawoo-rt
 
-Server code used for my pawoo retweet iOS shortcut.
+Server code used for my pawoo retweet iOS shortcut and [Tootthat](https://github.com/xatier/tootthat).
 
 The shortcut makes the following `POST` request:
 
