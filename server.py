@@ -19,7 +19,7 @@ def get_logger(name: str) -> logging.Logger:
 
 LOGGER = get_logger(__name__)
 
-TWITTER_STATUS_REGEX = r'https://twitter.com/(\w+)/status/(\d+)'
+TWITTER_STATUS_REGEX = r'https://(mobile\.)?twitter.com/(\w+)/status/(\d+)'
 EMBED_API = 'https://publish.twitter.com/oembed?url={url}&omit_script=true'
 
 TOKEN = os.environ.get('TOKEN', '5566')
@@ -84,5 +84,8 @@ def do(payload: Payload) -> Dict[str, str] | None:
     if not validate(status, token):
         LOGGER.warning('/do ...invalid')
         raise HTTPException(status_code=403, detail="^q^")
+
+    # trim 'mobile' prefix
+    status = status.replace('mobile.twitter.com', 'twitter.com', 1)
 
     return process(status)
