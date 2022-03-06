@@ -1,3 +1,4 @@
+import html
 import logging
 import os
 import re
@@ -52,23 +53,29 @@ def invalid() -> None:
     raise HTTPException(status_code=500, detail="q_q")
 
 
+def process_tweet(html_text: str) -> str | None:
+    html_text = html.unescape(html_text)
+    if m := re.search(
+        r'<p(.+?)>(.+?)<\/p>',
+        html_text,
+    ):
+        tweet = m.group(2)
+        tweet = re.sub(r'<br>', '\n', tweet)
+        tweet = re.sub(r'(pic.twitter.com/\w{,15})', r'https://\1', tweet)
+        return re.sub(r'<.+?>', ' ', tweet)
+
+    return None
+
+
 def process(status: str) -> Dict[str, str] | None:
     r: httpx.Response = httpx.get(EMBED_API.format(url=status))
     if r.status_code != httpx.codes.OK:
         invalid()
 
     j = r.json()
-    html: str = j.get('html', '')
-    if m := re.search(
-        r'<p(.+?)>(.+?)<\/p>',
-        html,
-    ):
-        tweet = m.group(2)
-        tweet = re.sub(r'<br>', '\n', tweet)
-        tweet = re.sub(r'(pic.twitter.com/\w{,15})', r'https://\1', tweet)
-        tweet = re.sub(r'<.+?>', ' ', tweet)
+    html_text: str = j.get('html', '')
+    if tweet := process_tweet(html_text):
         LOGGER.info(f'{status} ->\n{tweet}')
-
         return {'status': tweet}
 
     invalid()
