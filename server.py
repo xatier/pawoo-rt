@@ -42,15 +42,35 @@ app.add_middleware(
 )
 
 
-def validate(status: str, token: str) -> bool:
-    if token != TOKEN:
-        return False
+def validate_token(status: str, token: str) -> bool:
+    return token == TOKEN
+
+
+def is_tweet(status: str) -> bool:
     return bool(re.match(TWITTER_STATUS_REGEX, status))
 
 
 def invalid() -> None:
     LOGGER.warning('/do ...invalid')
     raise HTTPException(status_code=500, detail="q_q")
+
+
+def get_title(status: str) -> Dict[str, str] | None:
+    try:
+        text = httpx.get(
+            status, headers={
+                'user-agent': 'Mozilla/5.0 Chrome/102.0.4985.0'
+            }
+        ).text
+        title = text[text.find('<title>') +
+                     len('<title>'):text.find('</title>')]
+        LOGGER.info(f'{status} ->\n{title}')
+        return {'status': title}
+    except httpx.HTTPError as e:
+        LOGGER.warning(f'HTTP error on "{status}", {e}')
+
+    invalid()
+    return None  # unreachable
 
 
 def process_tweet(html_text: str) -> str | None:
@@ -68,6 +88,10 @@ def process_tweet(html_text: str) -> str | None:
 
 
 def process(status: str) -> Dict[str, str] | None:
+    # fetch page title if it's not a tweet
+    if not is_tweet(status):
+        return get_title(status)
+
     r: httpx.Response = httpx.get(EMBED_API.format(url=status))
     if r.status_code != httpx.codes.OK:
         invalid()
@@ -88,8 +112,8 @@ def do(payload: Payload) -> Dict[str, str] | None:
 
     status, token = payload.status, payload.token
 
-    if not validate(status, token):
-        LOGGER.warning('/do ...invalid')
+    if not validate_token(status, token):
+        LOGGER.warning(f'/do ...invalid token {token}')
         raise HTTPException(status_code=403, detail="^q^")
 
     # trim 'mobile' prefix
