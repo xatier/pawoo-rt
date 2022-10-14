@@ -4,9 +4,9 @@ import os
 import re
 from typing import Dict
 
+import httpx
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-import httpx
 from pydantic import BaseModel
 
 
@@ -18,12 +18,12 @@ def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 
-LOGGER = get_logger(__name__)
+LOGGER: logging.Logger = get_logger(__name__)
 
-TWITTER_STATUS_REGEX = r'https://(mobile\.)?twitter.com/(\w+)/status/(\d+)'
-EMBED_API = 'https://publish.twitter.com/oembed?url={url}&omit_script=true'
+TWITTER_STATUS_REGEX: str = r'https://(mobile\.)?twitter.com/(\w+)/status/(\d+)'
+EMBED_API: str = 'https://publish.twitter.com/oembed?url={url}&omit_script=true'
 
-TOKEN = os.environ.get('TOKEN', '5566')
+TOKEN: str = os.environ.get('TOKEN', '5566')
 LOGGER.info(f'TOKEN: {TOKEN}')
 
 
@@ -32,7 +32,7 @@ class Payload(BaseModel):
     token: str
 
 
-app = FastAPI()
+app: FastAPI = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -57,13 +57,13 @@ def invalid() -> None:
 
 def get_title(status: str) -> Dict[str, str] | None:
     try:
-        text = httpx.get(
+        text: str = httpx.get(
             status, headers={
                 'user-agent': 'Mozilla/5.0 Chrome/102.0.4985.0'
             }
         ).text
-        title = text[text.find('<title>') +
-                     len('<title>'):text.find('</title>')]
+        title: str = text[text.find('<title>') +
+                          len('<title>'):text.find('</title>')]
         LOGGER.info(f'{status} ->\n{title}')
         return {'status': title}
     except httpx.HTTPError as e:
@@ -79,7 +79,7 @@ def process_tweet(html_text: str) -> str | None:
         r'<p(.+?)>(.+?)<\/p>',
         html_text,
     ):
-        tweet = m.group(2)
+        tweet = m[2]
         tweet = re.sub(r'<br>', '\n', tweet)
         tweet = re.sub(r'(pic.twitter.com/\w{,15})', r'https://\1', tweet)
         return re.sub(r'<.+?>', ' ', tweet)
