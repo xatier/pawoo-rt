@@ -20,7 +20,7 @@ def get_logger(name: str) -> logging.Logger:
 
 LOGGER: logging.Logger = get_logger(__name__)
 
-TWITTER_STATUS_REGEX: str = r'https://(mobile\.)?twitter.com/(\w+)/status/(\d+)'
+TWITTER_STATUS_REGEX: str = r'https://(mobile\.)?(twitter|x).com/(\w+)/status/(\d+)'
 EMBED_API: str = 'https://publish.twitter.com/oembed?url={url}&omit_script=true'
 
 TOKEN: str = os.environ.get('TOKEN', '5566')
@@ -91,6 +91,10 @@ def process(status: str) -> Dict[str, str] | None:
     # fetch page title if it's not a tweet
     if not is_tweet(status):
         return get_title(status)
+
+    # EMBED_API only works with twitter.com
+    if 'x.com' in status:
+        status = status.replace('x.com', 'twitter.com')
 
     r: httpx.Response = httpx.get(EMBED_API.format(url=status))
     if r.status_code != httpx.codes.OK:
