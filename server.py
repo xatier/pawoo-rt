@@ -26,6 +26,36 @@ EMBED_API: str = 'https://publish.twitter.com/oembed?url={url}&omit_script=true'
 TOKEN: str = os.environ.get('TOKEN', '5566')
 LOGGER.info(f'TOKEN: {TOKEN}')
 
+# https://www.w3schools.com/charsets/ref_utf_punctuation.asp
+UNICODE_PUNCTUATION = {
+    '&#8191;': ' ',
+    '&#8195;': ' ',
+    '&#8201;': ' ',
+    '&#8208;': '‐',
+    '&#8209;': '‑',
+    '&#8210;': '‒',
+    '&#8211;': '–',
+    '&#8212;': '—',
+    '&#8216;': '‘',
+    '&#8217;': '’',
+    '&#8218;': '‚',
+    '&#8219;': '‛',
+    '&#8220;': '“',
+    '&#8221;': '”',
+    '&#8222;': '„',
+    '&#8223;': '‟',
+    '&#8224;': '†',
+    '&#8225;': '‡',
+    '&#8226;': '•',
+    '&#8230;': '…',
+    '&#8240;': '‰',
+    '&#8242;': '′',
+    '&#8243;': '″',
+    '&#8249;': '‹',
+    '&#8250;': '›',
+    '&#8254;': '‾',
+}
+
 
 class Payload(BaseModel):
     status: str
@@ -64,6 +94,8 @@ def get_title(status: str) -> Dict[str, str] | None:
         ).text
         title: str = text[text.find('<title>') +
                           len('<title>'):text.find('</title>')]
+        for k in UNICODE_PUNCTUATION:
+            title = title.replace(k, UNICODE_PUNCTUATION[k])
         LOGGER.info(f'{status} ->\n{title}')
         return {'status': title}
     except httpx.HTTPError as e:
