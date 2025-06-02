@@ -122,7 +122,7 @@ def get_title(status: str) -> Dict[str, str] | None:
     try:
         text: str = httpx.get(
             status, headers={
-                'user-agent': 'Mozilla/5.0 Chrome/102.0.4985.0'
+                'user-agent': 'Mozilla/5.0 Chrome/138.0.0.0'
             }
         ).text
         title: str = text[text.find('<title>') +
