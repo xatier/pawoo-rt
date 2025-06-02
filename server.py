@@ -125,8 +125,19 @@ def get_title(status: str) -> Dict[str, str] | None:
                 'user-agent': 'Mozilla/5.0 Chrome/138.0.0.0'
             }
         ).text
-        title: str = text[text.find('<title>') +
-                          len('<title>'):text.find('</title>')]
+        if text.find('<title>') != -1:
+            title: str = text[text.find('<title>') +
+                              len('<title>'):text.find('</title>')]
+        # the title tag has some other attributes
+        elif text.find('<title ') != -1:
+            m = re.match(r'<title\s+([^>]+=\"[^\"]+\")>(.*?)</title>', text)
+            if m is not None:
+                title: str = m.group(2)
+            else:
+                # last resort, poor man's parsing
+                tmp = text[text.find('<title ') +
+                           len('<title '):text.find('</title>')]
+                title = tmp[tmp.find('>') + 1:]
         for k in UNICODE_PUNCTUATION:
             title = title.replace(k, UNICODE_PUNCTUATION[k])
         LOGGER.info(f'{status} ->\n{title}')
