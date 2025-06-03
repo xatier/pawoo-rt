@@ -26,69 +26,6 @@ EMBED_API: str = 'https://publish.twitter.com/oembed?url={url}&omit_script=true'
 TOKEN: str = os.environ.get('TOKEN', '5566')
 LOGGER.info(f'TOKEN: {TOKEN}')
 
-# https://www.w3schools.com/charsets/ref_utf_basic_latin.asp
-# https://www.w3schools.com/charsets/ref_utf_punctuation.asp
-UNICODE_PUNCTUATION = {
-    '&#033;': '!',
-    '&#034;': '"',
-    '&#035;': '#',
-    '&#036;': '$',
-    '&#037;': '%',
-    '&#038;': '&',
-    '&#039;': "'",
-    '&#040;': '(',
-    '&#041;': ')',
-    '&#042;': '*',
-    '&#043;': '+',
-    '&#044;': ',',
-    '&#045;': '-',
-    '&#046;': '.',
-    '&#047;': '/',
-    '&#058;': ':',
-    '&#059;': ';',
-    '&#060;': '<',
-    '&#061;': '=',
-    '&#062;': '>',
-    '&#063;': '?',
-    '&#064;': '@',
-    '&#091;': '[',
-    '&#092;': '\\',
-    '&#093;': ']',
-    '&#094;': '^',
-    '&#095;': '_',
-    '&#096;': '`',
-    '&#0123;': '{',
-    '&#0124;': '|',
-    '&#0125;': '}',
-    '&#0126;': '~',
-    '&#8191;': ' ',
-    '&#8195;': ' ',
-    '&#8201;': ' ',
-    '&#8208;': '‐',
-    '&#8209;': '‑',
-    '&#8210;': '‒',
-    '&#8211;': '–',
-    '&#8212;': '—',
-    '&#8216;': '‘',
-    '&#8217;': '’',
-    '&#8218;': '‚',
-    '&#8219;': '‛',
-    '&#8220;': '“',
-    '&#8221;': '”',
-    '&#8222;': '„',
-    '&#8223;': '‟',
-    '&#8224;': '†',
-    '&#8225;': '‡',
-    '&#8226;': '•',
-    '&#8230;': '…',
-    '&#8240;': '‰',
-    '&#8242;': '′',
-    '&#8243;': '″',
-    '&#8249;': '‹',
-    '&#8250;': '›',
-    '&#8254;': '‾',
-}
-
 
 class Payload(BaseModel):
     status: str
@@ -138,8 +75,7 @@ def get_title(status: str) -> Dict[str, str] | None:
                 tmp = text[text.find('<title ') +
                            len('<title '):text.find('</title>')]
                 title = tmp[tmp.find('>') + 1:]
-        for k in UNICODE_PUNCTUATION:
-            title = title.replace(k, UNICODE_PUNCTUATION[k])
+        title = html.unescape(title)
         LOGGER.info(f'{status} ->\n{title}')
         return {'status': title}
     except httpx.HTTPError as e:
