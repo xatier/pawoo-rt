@@ -80,6 +80,8 @@ def get_title(status: str) -> Dict[str, str] | None:
         return {'status': title}
     except httpx.HTTPError as e:
         LOGGER.warning(f'HTTP error on "{status}", {e}')
+    except httpx.InvalidURL as e:
+        LOGGER.warning(f'"{status}" contains invalid URL, {e}')
 
     invalid()
     return None  # unreachable
@@ -134,5 +136,11 @@ def do(payload: Payload) -> Dict[str, str] | None:
 
     # trim 'mobile' prefix
     status = status.replace('mobile.twitter.com', 'twitter.com', 1)
+    status = status.strip()
+
+    # workaround for iOS/iPadOS shared menu not getting proper URL
+    if 'https://arxiv.org' in status:
+        status = status.split()[1]
+        LOGGER.warning(f'using "{status}" instead for arxiv.org')
 
     return process(status)
