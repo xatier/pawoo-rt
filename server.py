@@ -139,7 +139,8 @@ def do(payload: Payload) -> Dict[str, str] | None:
     status = status.strip()
 
     # workaround for iOS/iPadOS shared menu not getting proper URL
-    if 'https://arxiv.org' in status:
+    arxiv = 'https://arxiv.org'
+    if arxiv in status and not status.startswith(arxiv):
         status = status.split()[1]
         LOGGER.warning(f'using "{status}" instead for arxiv.org')
 
