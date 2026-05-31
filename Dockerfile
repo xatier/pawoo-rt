@@ -18,4 +18,4 @@ RUN python -m venv venv && \
     pip install --no-cache-dir -U pip && \
     pip install --no-cache-dir -r requirements.txt
 
-CMD ["bash", "-c", "source venv/bin/activate && exec uvicorn server:app --reload --port 5566"]
+CMD ["bash", "-c", "source venv/bin/activate && exec uvicorn server:app --reload --host 0.0.0.0 --port 5566"]
