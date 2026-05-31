@@ -21,7 +21,7 @@ def get_logger(name: str) -> logging.Logger:
 LOGGER: logging.Logger = get_logger(__name__)
 
 TWITTER_STATUS_REGEX: str = r'https://(mobile\.)?(twitter|x).com/(\w+)/status/(\d+)'
-EMBED_API: str = 'https://publish.twitter.com/oembed?url={url}&omit_script=true'
+EMBED_API: str = 'https://publish.x.com/oembed?url={url}&omit_script=true'
 
 TOKEN: str = os.environ.get('TOKEN', '5566')
 LOGGER.info(f'TOKEN: {TOKEN}')
