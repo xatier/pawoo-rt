@@ -4,7 +4,7 @@ import os
 import re
 from typing import Dict
 
-import httpx
+import httpx2
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -57,7 +57,7 @@ def invalid() -> None:
 
 def get_title(status: str) -> Dict[str, str] | None:
     try:
-        text: str = httpx.get(
+        text: str = httpx2.get(
             status, headers={
                 'user-agent': 'Mozilla/5.0 Chrome/138.0.0.0'
             }
@@ -78,9 +78,9 @@ def get_title(status: str) -> Dict[str, str] | None:
         title = html.unescape(title)
         LOGGER.info(f'{status} ->\n{title}')
         return {'status': title}
-    except httpx.HTTPError as e:
+    except httpx2.HTTPError as e:
         LOGGER.warning(f'HTTP error on "{status}", {e}')
-    except httpx.InvalidURL as e:
+    except httpx2.InvalidURL as e:
         LOGGER.warning(f'"{status}" contains invalid URL, {e}')
 
     invalid()
@@ -110,8 +110,8 @@ def process(status: str) -> Dict[str, str] | None:
     if 'x.com' in status:
         status = status.replace('x.com', 'twitter.com')
 
-    r: httpx.Response = httpx.get(EMBED_API.format(url=status))
-    if r.status_code != httpx.codes.OK:
+    r: httpx2.Response = httpx2.get(EMBED_API.format(url=status))
+    if r.status_code != httpx2.codes.OK:
         invalid()
 
     j = r.json()
