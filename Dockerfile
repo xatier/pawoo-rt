@@ -2,7 +2,8 @@ FROM ghcr.io/xatier/arch-dev:latest
 
 USER root
 RUN pacman -Syuu --noconfirm --needed \
-    python
+    python \
+    cloudflared
 
 WORKDIR /app
 RUN chown xatier:xatier /app
