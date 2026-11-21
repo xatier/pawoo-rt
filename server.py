@@ -3,6 +3,7 @@ import logging
 import os
 import re
 from typing import Dict
+from urllib.parse import urlsplit
 
 import httpx2
 from fastapi import FastAPI, HTTPException, status
@@ -106,9 +107,9 @@ def process(status: str) -> Dict[str, str] | None:
     if not is_tweet(status):
         return get_title(status)
 
-    # EMBED_API only works with twitter.com
     if 'x.com' in status:
-        status = status.replace('x.com', 'twitter.com')
+        # drop all parameters
+        status = urlsplit(status)._replace(query="", fragment="").geturl()
 
     r: httpx2.Response = httpx2.get(EMBED_API.format(url=status))
     if r.status_code != httpx2.codes.OK:
